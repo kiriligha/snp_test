@@ -1,0 +1,9 @@
+case_id,period,product,qty
+CASE_01,2,C,120
+CASE_03,2,C,90
+CASE_03,2,C,90
+CASE_03,4,X,50
+CASE_06,4,C,200
+CASE_08,2,C,100
+CASE_08,4,P,20
+CASE_09,6,P,20

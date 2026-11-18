@@ -1,0 +1,349 @@
+<title>Распределение дефицита во времени</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+
+<style>
+  :root {
+    --ground: #f4f6f8;
+    --surface: #ffffff;
+    --surface-sunk: #eceff3;
+    --ink: #141a20;
+    --ink-soft: #4a5762;
+    --ink-faint: #7b8894;
+    --rule: #d5dce3;
+    --rule-soft: #e5eaef;
+    --accent: #1b3a5c;
+    --accent-soft: #e3ebf3;
+    --open: #8a5a12;
+    --open-soft: #f7eeda;
+
+    --font-ui: "Archivo", "Segoe UI", system-ui, sans-serif;
+    --font-read: "Source Serif 4", Georgia, serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
+
+    --measure: 68ch;
+    --page: 940px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0e1317; --surface: #161d23; --surface-sunk: #1d262e;
+      --ink: #e6ebef; --ink-soft: #a7b4bf; --ink-faint: #7c8994;
+      --rule: #2b363f; --rule-soft: #222c34;
+      --accent: #8ab6dd; --accent-soft: #1c2b39;
+      --open: #d9a961; --open-soft: #32281a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0e1317; --surface: #161d23; --surface-sunk: #1d262e;
+    --ink: #e6ebef; --ink-soft: #a7b4bf; --ink-faint: #7c8994;
+    --rule: #2b363f; --rule-soft: #222c34;
+    --accent: #8ab6dd; --accent-soft: #1c2b39;
+    --open: #d9a961; --open-soft: #32281a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: var(--page); margin: 0 auto; padding: 0 24px 96px; }
+
+  header.hero { padding: 56px 0 34px; border-bottom: 2px solid var(--ink); }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  h1 {
+    font-size: clamp(30px, 4.4vw, 44px); line-height: 1.08; font-weight: 700;
+    letter-spacing: -0.02em; margin: 14px 0 0; text-wrap: balance;
+  }
+  .standfirst {
+    font-family: var(--font-read); font-size: 18px; line-height: 1.6;
+    color: var(--ink-soft); max-width: var(--measure); margin: 16px 0 0;
+  }
+  .facts {
+    margin-top: 28px; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+  }
+  .fact { background: var(--surface); padding: 13px 16px; }
+  .fact dt {
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .fact dd {
+    margin: 6px 0 0; font-size: 19px; font-weight: 600;
+    letter-spacing: -0.01em; font-variant-numeric: tabular-nums;
+  }
+
+  section { padding-top: 48px; }
+  h2 { font-size: 24px; font-weight: 700; letter-spacing: -0.015em; margin: 10px 0 0; text-wrap: balance; }
+  h3 { font-size: 16px; font-weight: 600; margin: 30px 0 8px; }
+  p, li { font-family: var(--font-read); }
+  section > p, .lede { max-width: var(--measure); color: var(--ink-soft); font-size: 16px; }
+  .lede { margin: 12px 0 0; }
+  code { font-family: var(--font-mono); font-size: 0.88em; background: var(--surface-sunk); padding: 1px 5px; border-radius: 2px; }
+
+  ul.tight, ol.tight { max-width: var(--measure); padding-left: 20px; margin: 12px 0 0; }
+  ul.tight li, ol.tight li { margin-bottom: 8px; color: var(--ink-soft); font-size: 15.5px; }
+  ol.tight li::marker { font-family: var(--font-ui); font-weight: 600; color: var(--ink); }
+
+  .scroll { overflow-x: auto; margin-top: 18px; border: 1px solid var(--rule); background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 520px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--rule-soft); }
+  thead th {
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.11em;
+    text-transform: uppercase; color: var(--ink-faint); background: var(--surface-sunk);
+    border-bottom: 1px solid var(--rule); white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td { font-family: var(--font-read); font-size: 14.5px; color: var(--ink-soft); }
+  td.key { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink); white-space: nowrap; font-weight: 500; }
+
+  /* fixed vs open decisions */
+  .fixed {
+    margin-top: 20px; border: 1px solid var(--accent); background: var(--accent-soft);
+    padding: 18px 20px;
+  }
+  .fixed .label, .open .label {
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.13em;
+    text-transform: uppercase; display: block; margin-bottom: 8px;
+  }
+  .fixed .label { color: var(--accent); }
+  .fixed ol { margin: 0; padding-left: 20px; max-width: var(--measure); }
+  .fixed li { color: var(--ink); font-size: 15.5px; margin-bottom: 6px; }
+  .fixed li:last-child { margin-bottom: 0; }
+
+  .open {
+    margin-top: 18px; border: 1px dashed var(--open); background: var(--open-soft);
+    padding: 18px 20px;
+  }
+  .open .label { color: var(--open); }
+  .open ul { margin: 0; padding-left: 20px; max-width: var(--measure); }
+  .open li { color: var(--ink); font-size: 15.5px; margin-bottom: 6px; }
+  .open li:last-child { margin-bottom: 0; }
+
+  .callout {
+    margin-top: 22px; border-left: 3px solid var(--accent); background: var(--surface);
+    padding: 14px 18px; max-width: var(--measure);
+  }
+  .callout p { margin: 0; font-size: 15px; color: var(--ink-soft); }
+  .callout strong { color: var(--ink); }
+
+  pre {
+    margin-top: 16px; background: var(--surface); border: 1px solid var(--rule);
+    padding: 15px 18px; overflow-x: auto; font-family: var(--font-mono);
+    font-size: 12.5px; line-height: 1.7; color: var(--ink-soft);
+  }
+  pre .kw { color: var(--accent); font-weight: 500; }
+
+  footer {
+    margin-top: 60px; padding-top: 18px; border-top: 1px solid var(--rule);
+    font-size: 13px; color: var(--ink-faint); font-family: var(--font-mono);
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Тестовое задание · модуль SNP Heuristic</div>
+    <h1>Распределение дефицита во времени</h1>
+    <p class="standfirst">Доступного объёма меньше, чем просят. Нужно решить, кто и сколько получит в свою неделю — и суметь объяснить, почему именно так.</p>
+
+    <dl class="facts">
+      <div class="fact"><dt>Бюджет времени</dt><dd>3–4 часа</dd></div>
+      <div class="fact"><dt>Ядро алгоритма</dt><dd>≤ 200 строк</dd></div>
+      <div class="fact"><dt>Отчёт</dt><dd>1–2 стр.</dd></div>
+      <div class="fact"><dt>Защита</dt><dd>устная</dd></div>
+    </dl>
+  </header>
+
+  <section>
+    <h2>Прежде чем начать</h2>
+    <p class="lede"><strong>Не укладываетесь в 3–4 часа — не доделывайте.</strong> Опишите в отчёте, что осталось и почему. Незаконченная, но осмысленная работа ценится выше «полной», которую вы не можете объяснить.</p>
+
+    <h3>Про ИИ-ассистентов</h3>
+    <p>Использовать ИИ-ассистентов можно и нужно — мы сами пользуемся ими каждый день. Но защита задания устная: 30–40 минут вопросов вида «почему так, а не иначе» и «что сломается, если…», плюс живая правка кода под изменённое требование.</p>
+    <p>В отчёте опишите, <strong>как именно</strong> использовали ассистента: какие части постановки и кода обсуждали с ним, что сгенерировали, что переписали и как проверяли результат. Это не декларация «использовал / не использовал», а инженерная дисциплина: тот, кто понимает свой инструмент, отвечает на защите спокойнее того, кто скрывает его использование.</p>
+    <div class="callout">
+      <p><strong>Код и текст, которые вы не можете объяснить и изменить на месте, считаются отсутствующими.</strong> Поэтому важен не объём, а то, чтобы каждое решение было вашим осознанным выбором.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Контекст</div>
+    <h2>Что делает модуль</h2>
+    <p class="lede">SNP Heuristic строит объёмный план цепи поставок: проходит по периодам и уровням сети — заводы, распределительные центры, точки продаж — и на каждом шаге решает, как распределить ограниченный доступный объём между конкурирующими потребностями.</p>
+    <p class="lede">Ваша задача — кусок этого алгоритма: <strong>распределение по неделям</strong>. Спрос и поступления разбиты по периодам, между ними стоит сборка продукта из компонента. Более приоритетная заявка через месяц важнее сиюминутной, и одна ошибка во времени делает план неисполнимым, даже если все числа сошлись.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Вход</div>
+    <h2>Данные</h2>
+    <p class="lede">Число недель горизонта задаётся в <code>policies.csv</code> (в датасетах — 8), нумерация с нуля. Пять файлов, кодировка UTF-8. Кейсы независимы: каждый <code>case_id</code> — отдельная задача.</p>
+
+    <h3><code>data/bom.csv</code> — спецификация сборки (общая для всех кейсов)</h3>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Поле</th><th>Смысл</th></tr></thead>
+        <tbody>
+          <tr><td class="key">component</td><td>Компонент</td></tr>
+          <tr><td class="key">product</td><td>Готовый продукт, который из него собирают</td></tr>
+          <tr><td class="key">qty_per_unit</td><td>Сколько компонента уходит на единицу продукта</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3><code>data/policies.csv</code> — правила сборки (общие для всех кейсов)</h3>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Поле</th><th>Смысл</th></tr></thead>
+        <tbody>
+          <tr><td class="key">parameter</td><td>Имя параметра</td></tr>
+          <tr><td class="key">value</td><td>Значение</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="tight">
+      <li><code>assembly_multiple</code> — партия сборки кратна этому числу.</li>
+      <li><code>assembly_lead_weeks</code> — срок сборки: продукт, собранный в неделю <code>t</code>, доступен для отгрузки начиная с недели <code>t + срок</code>.</li>
+      <li><code>horizon</code> — число недель горизонта.</li>
+    </ul>
+
+    <h3><code>data/stock.csv</code> — запасы на начало горизонта</h3>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Поле</th><th>Смысл</th></tr></thead>
+        <tbody>
+          <tr><td class="key">case_id, product</td><td>Кейс и продукт (<code>P</code> или <code>C</code>)</td></tr>
+          <tr><td class="key">initial_qty</td><td>Начальный запас</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3><code>data/receipts.csv</code> — расписание поступлений</h3>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Поле</th><th>Смысл</th></tr></thead>
+        <tbody>
+          <tr><td class="key">case_id, period, product</td><td>Что и в какую неделю приходит</td></tr>
+          <tr><td class="key">qty</td><td>Сколько</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lede" style="margin-top:14px">Поступления уже размещены — <strong>расписание менять нельзя</strong>. Поступление недели <code>w</code> доступно для сборки и отгрузки в ту же неделю <code>w</code>. Поступать может и компонент, и готовый продукт.</p>
+
+    <h3><code>data/demand.csv</code> — спрос на продукт</h3>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Поле</th><th>Смысл</th></tr></thead>
+        <tbody>
+          <tr><td class="key">case_id, period</td><td>Неделя заявки</td></tr>
+          <tr><td class="key">request_id</td><td>Кто просит</td></tr>
+          <tr><td class="key">priority</td><td>Приоритет, <strong>1 — наивысший</strong></td></tr>
+          <tr><td class="key">qty</td><td>Сколько запрошено</td></tr>
+          <tr><td class="key">min_lot</td><td>Минимальная партия отгрузки; 0 — ограничения нет</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Пример</h3>
+<pre>bom.csv                            policies.csv                  stock.csv
+component,product,qty_per_unit      parameter,value               case_id,product,initial_qty
+C,P,2                              assembly_multiple,10          CASE_01,P,100
+                                   assembly_lead_weeks,1          CASE_01,C,50
+                                   horizon,8
+
+receipts.csv               demand.csv
+case_id,period,product,qty case_id,period,request_id,priority,qty,min_lot
+CASE_01,2,C,200            CASE_01,3,R-1,1,100,0
+CASE_01,5,P,40             CASE_01,4,R-2,1,40,0</pre>
+  </section>
+
+  <section>
+    <div class="eyebrow">Требуется · 1</div>
+    <h2>Правило планирования</h2>
+    <p class="lede">Сформулируйте и реализуйте правило: что собирать и кто сколько получает в свою неделю. Жёстко задано только следующее.</p>
+
+    <div class="fixed">
+      <span class="label">Зафиксировано — нарушать нельзя</span>
+      <ol>
+        <li>Запасы продукта и компонента не уходят в минус ни в одну неделю.</li>
+        <li>Сборка кратна <code>assembly_multiple</code>, компонент списывается по спецификации в неделю сборки, продукт доступен через <code>assembly_lead_weeks</code>.</li>
+        <li>Заявка отгружается в свою неделю: объём — 0, либо не меньше <code>min_lot</code> и не больше <code>qty</code>.</li>
+        <li>Приоритет соблюдается строго: заявка с бо́льшим номером не получает отгрузку, пока более приоритетная заявка, которую можно покрыть из тех же запасов, остаётся без отгрузки — в том числе заявка будущих недель.</li>
+        <li>Расписание поступлений неизменно; результат детерминирован: повторный запуск на тех же данных даёт ровно тот же план.</li>
+      </ol>
+    </div>
+
+    <div class="open">
+      <span class="label">Ваше проектное решение</span>
+      <ul>
+        <li>Порядок обслуживания заявок одного приоритета в разных неделях — по хронологии или иначе, и что из этого лучше для бизнеса.</li>
+        <li>Полнота покрытия при дефиците — покрыть немногих целиком или всех частично.</li>
+        <li>Можно ли собирать «впрок», без подтверждённого спроса, и что делать с остатком компонента.</li>
+        <li>Как разрешать ничьи и как вести себя на некорректных или противоречивых данных.</li>
+      </ul>
+    </div>
+
+    <div class="callout">
+      <p>Постановка намеренно неполная — так к нам приходят задачи от бизнеса. Мы смотрим не на то, угадали ли вы «правильный» ответ (его нет), а на то, <strong>как вы обнаружили пробелы, какое решение приняли и как его обосновали</strong>. Проверяйте правило на двух вопросах: «какой объём спроса в итоге покрыт?» и «не отдал ли я запас завтрашней более важной заявке ради сегодняшней менее важной?».</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Требуется · 2</div>
+    <h2>Код</h2>
+    <ul class="tight">
+      <li>Python 3.10+, стандартная библиотека. <code>pandas</code> и <code>numpy</code> — по желанию, не обязательны. Для <strong>необязательных частей</strong> решения (например, визуализаций) допускаются и другие зависимости. Основной расчёт должен запускаться одной командой и без них.</li>
+      <li><strong>Ядро алгоритма — не более 200 строк</strong> без учёта тестов, чтения CSV и вывода.</li>
+      <li>Точка входа считает все кейсы из каталога данных (каталог задаётся аргументом) и по каждому выводит в читаемом виде:
+        план отгрузек — заявка, объём; план сборки по неделям; плановые запасы <code>P</code> и <code>C</code> по неделям;
+        реестр непокрытого спроса — заявка, объём, причина;
+        строку статуса: заявок всего, покрыто, непокрыто.</li>
+      <li>Код завершения: <code>0</code> — всё покрыто; <code>1</code> — есть непокрытый спрос (реестр выведен); <code>2</code> — данные не читаются или противоречивы, расчёт не начинался.</li>
+      <li>Скорость: горизонт 52 недели, 10 000 заявок, поступления каждую неделю — расчёт за несколько секунд на обычном ноутбуке.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="eyebrow">Требуется · 3</div>
+    <h2>Тесты</h2>
+    <p class="lede"><code>pytest</code>. Помимо кейсов из CSV добавьте <strong>минимум два собственных</strong>, которые придумали сами.</p>
+    <p class="lede">Для каждого теста — одна строка: какое поведение он фиксирует и что сломается, если это поведение изменить.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Требуется · 4</div>
+    <h2>Отчёт <code>REPORT.md</code></h2>
+    <p class="lede">Одна–две страницы, не больше.</p>
+    <ol class="tight">
+      <li><strong>Журнал решений</strong> — по каждому открытому пункту задания: что выбрали, какую альтернативу отвергли и почему. На одном небольшом числовом примере покажите, чем выбранная политика отличается от разумной альтернативы; реализовывать второй алгоритм не требуется. <em>Без этого раздела работа не рассматривается.</em></li>
+      <li><strong>Что не так во входных данных и в постановке</strong> — список замеченных проблем и как вы с каждой поступили.</li>
+      <li><strong>Три вопроса аналитику</strong> — те, ответы на которые реально изменили бы вашу реализацию. Не «уточните формат даты».</li>
+      <li><strong>Границы применимости</strong> — где ваше правило даст плохой план и почему.</li>
+      <li><strong>Масштаб</strong> — что произойдёт, если кейсов 5 млн (все периоды × все позиции × вся сеть) и расчёт должен укладываться в окно ночного пересчёта.</li>
+      <li><strong>Большая сеть</strong> — только рассуждение, без кода. Как ваше правило изменится, если продуктов и компонентов тысячи, у сети несколько уровней, у линий есть мощность, а у партий — срок годности? Что сломается первым?</li>
+      <li><strong>Частичный пересчёт</strong> — только рассуждение, без кода. План уже посчитан, и пришло изменение: новая заявка, сдвиг поступления, корректировка одной партии сборки. Что в вашем решении можно переиспользовать, что придётся считать заново и почему?</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="eyebrow">Сдача</div>
+    <h2>Формат</h2>
+    <p class="lede">Git-репозиторий или архив: код, тесты, <code>REPORT.md</code>, <code>README</code> с описанием запуска. Работа должна запускаться на чистом окружении одной командой.</p>
+    <p class="lede">В <code>README</code> покажите, как воспроизвести валидный расчёт и ожидаемый отказ на проблемном входе. Исходные CSV не исправляйте молча: подготовку отдельных входов для демонстрации сделайте явной и воспроизводимой. Валидный расчёт можно показать и через тесты.</p>
+  </section>
+
+  <footer>In.Plan · SNP Heuristic · тестовое задание</footer>
+</div>
