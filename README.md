@@ -28,6 +28,6 @@ python3 run.py demo; echo $?                       # 1
 ## Тесты
 
 ```bash
-python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m pytest
 ```
